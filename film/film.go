@@ -3,8 +3,13 @@ package film
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"golang.org/x/net/html"
+)
+
+const (
+	FilmPosterIndicator = "Watch trailer for "
 )
 
 type Film struct {
@@ -43,6 +48,10 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 		extractTitle(n, curFilm)
 	}
 
+	if n.Type == html.ElementNode && n.Data == "rt-img" {
+		extractPosterUrl(n, curFilm)
+	}
+
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		extractFilmInfo(c, curFilm)
 	}
@@ -57,5 +66,23 @@ func extractTitle(n *html.Node, curFilm *Film) {
 				break
 			}
 		}
+	}
+}
+
+func extractPosterUrl(n *html.Node, curFilm *Film) {
+	correctImg := false
+	src := ""
+	for _, attr := range n.Attr {
+		if attr.Key == "alt" && strings.HasPrefix(attr.Val, FilmPosterIndicator) {
+			correctImg = true
+		}
+
+		if attr.Key == "src" {
+			src = attr.Val
+		}
+	}
+
+	if correctImg {
+		curFilm.PosterUrl = src
 	}
 }
