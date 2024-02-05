@@ -10,20 +10,22 @@ import (
 
 const (
 	FilmPosterIndicator = "Watch trailer for "
+	MovieIndicator      = "/m/"
 )
 
 type Film struct {
-	Title         string `json:"title"`
-	URL           string `json:"url"`
-	PosterUrl     string `json:"poster_url"`
-	MediaType     string `json:"media_type"`
-	Rating        string `json:"rating"`
-	Year          string `json:"year"`
-	Genre         string `json:"genre"`
-	Runtime       string `json:"runtime"`
-	AudienceScore string `json:"audience_score"`
-	TomatoScore   string `json:"tomato_score"`
-	Ratings       string `json:"ratings"`
+	Title         string   `json:"title"`
+	URL           string   `json:"url"`
+	PosterUrl     string   `json:"poster_url"`
+	MediaType     string   `json:"media_type"`
+	Rating        string   `json:"rating"`
+	Year          string   `json:"year"`
+	Genre         string   `json:"genre"`
+	Runtime       string   `json:"runtime"`
+	AudienceScore string   `json:"audience_score"`
+	TomatoScore   string   `json:"tomato_score"`
+	Ratings       string   `json:"ratings"`
+	SimilarFilms  []string `json:"similar_films"`
 }
 
 func GetFilm(url string) (*Film, error) {
@@ -52,6 +54,7 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 		}
 
 		if n.Data == "a" {
+			extractSimilar(n, curFilm)
 			extractRatings(n, curFilm)
 		}
 
@@ -70,6 +73,23 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		extractFilmInfo(c, curFilm)
+	}
+}
+
+func extractSimilar(n *html.Node, curFilm *Film) {
+	for _, attr := range n.Attr {
+		if attr.Key == "href" {
+			url := attr.Val
+
+			if strings.HasPrefix(url, MovieIndicator) {
+				parts := strings.Split(url[3:], "/")
+				if len(parts) == 1 {
+					curFilm.SimilarFilms = append(curFilm.SimilarFilms, parts[0])
+				}
+			}
+
+			break
+		}
 	}
 }
 
