@@ -27,14 +27,16 @@ type Film struct {
 	Year          string   `json:"year"`
 	Genre         string   `json:"genre"`
 	Runtime       string   `json:"runtime"`
-	AudienceScore string   `json:"audience_score"`
+	AudienceScore int      `json:"audience_score"`
 	TomatoScore   string   `json:"tomato_score"`
 	Ratings       int      `json:"ratings"`
 	SimilarFilms  []string `json:"similar_films"`
 }
 
 func GetFilm(url string) (*Film, error) {
-	resp, err := http.Get(url)
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("http get failed: %w", err)
 	}
@@ -135,7 +137,8 @@ func extractScoreRatingMedia(n *html.Node, curFilm *Film) {
 		}
 
 		if attr.Key == "audiencescore" {
-			curFilm.AudienceScore = attr.Val
+			val, _ := strconv.Atoi(attr.Val)
+			curFilm.AudienceScore = val
 		}
 
 		if attr.Key == "mediatype" {

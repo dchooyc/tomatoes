@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"time"
 	"tomatoes/film"
 )
 
@@ -55,7 +56,7 @@ func arrangeFilms(titleToFilm map[string]*film.Film) film.Films {
 	arranged := []film.Film{}
 
 	for _, curFilm := range titleToFilm {
-		if curFilm != nil {
+		if curFilm != nil && meetsCriteria(curFilm) {
 			arranged = append(arranged, *curFilm)
 		}
 	}
@@ -65,6 +66,12 @@ func arrangeFilms(titleToFilm map[string]*film.Film) film.Films {
 	})
 
 	return film.Films{Films: arranged}
+}
+
+func meetsCriteria(curFilm *film.Film) bool {
+	ratings := curFilm.Ratings >= 1000
+	score := curFilm.AudienceScore >= 70
+	return ratings && score
 }
 
 func findFilms(queue []string, titleToFilm map[string]*film.Film, maxDepth, numWorkers int) {
@@ -147,6 +154,7 @@ func worker(workerID int, isLast bool, titles <-chan string, processedFilms chan
 			fmt.Printf("Worker %d: %s\n", workerID, pFilm.film.Title)
 		}
 		processedFilms <- pFilm
+		time.Sleep(time.Second * 2)
 		wg.Done()
 	}
 }
