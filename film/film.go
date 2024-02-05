@@ -48,6 +48,10 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 		extractTitle(n, curFilm)
 	}
 
+	if n.Type == html.ElementNode && n.Data == "p" {
+		extractDetails(n, curFilm)
+	}
+
 	if n.Type == html.ElementNode && n.Data == "rt-img" {
 		extractPosterUrl(n, curFilm)
 	}
@@ -95,6 +99,21 @@ func extractRating(n *html.Node, curFilm *Film) {
 	for _, attr := range n.Attr {
 		if attr.Key == "rating" {
 			curFilm.Rating = attr.Val
+		}
+	}
+}
+
+func extractDetails(n *html.Node, curFilm *Film) {
+	for _, attr := range n.Attr {
+		if attr.Key == "data-qa" && attr.Val == "score-panel-subtitle" {
+			textNode := n.FirstChild
+			if textNode != nil && textNode.Type == html.TextNode {
+				parts := strings.Split(textNode.Data, ", ")
+				curFilm.Year = parts[0]
+				curFilm.Genre = parts[1]
+				curFilm.Runtime = parts[2]
+				break
+			}
 		}
 	}
 }
