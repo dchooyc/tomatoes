@@ -10,7 +10,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	"tomatoes/film"
+
+	"github.com/dchooyc/film"
 )
 
 const (

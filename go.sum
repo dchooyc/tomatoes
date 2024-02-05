@@ -1,2 +1,4 @@
+github.com/dchooyc/film v0.0.0-20240205163944-febb394f9868 h1:MqdAg3rQx8fuo7pmE8mgxEkCDMNYZdzm24dVow73m2c=
+github.com/dchooyc/film v0.0.0-20240205163944-febb394f9868/go.mod h1:50GgIrGs5XA+cSWYWhM844lU9XYez6Po5g1NGIb8cV4=
 golang.org/x/net v0.20.0 h1:aCL9BSgETF1k+blQaYUBx9hJ9LOGP3gAVemcZlf1Kpo=
 golang.org/x/net v0.20.0/go.mod h1:z8BVo6PvndSri0LbOE3hAn0apkU+1YvI6E70E9jsnvY=
