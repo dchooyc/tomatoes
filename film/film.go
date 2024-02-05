@@ -51,6 +51,10 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 			extractTitle(n, curFilm)
 		}
 
+		if n.Data == "a" {
+			extractRatings(n, curFilm)
+		}
+
 		if n.Data == "p" {
 			extractYearGenreRuntime(n, curFilm)
 		}
@@ -128,6 +132,19 @@ func extractYearGenreRuntime(n *html.Node, curFilm *Film) {
 				curFilm.Year = parts[0]
 				curFilm.Genre = parts[1]
 				curFilm.Runtime = parts[2]
+				break
+			}
+		}
+	}
+}
+
+func extractRatings(n *html.Node, curFilm *Film) {
+	for _, attr := range n.Attr {
+		if attr.Key == "data-qa" && attr.Val == "audience-rating-count" {
+			textNode := n.FirstChild
+			if textNode != nil && textNode.Type == html.TextNode {
+				parts := strings.Fields(textNode.Data)
+				curFilm.Ratings = parts[0]
 				break
 			}
 		}
