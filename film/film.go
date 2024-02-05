@@ -46,20 +46,22 @@ func GetFilm(url string) (*Film, error) {
 }
 
 func extractFilmInfo(n *html.Node, curFilm *Film) {
-	if n.Type == html.ElementNode && n.Data == "h1" {
-		extractTitle(n, curFilm)
-	}
+	if n.Type == html.ElementNode {
+		if n.Data == "h1" {
+			extractTitle(n, curFilm)
+		}
 
-	if n.Type == html.ElementNode && n.Data == "p" {
-		extractYearGenreRuntime(n, curFilm)
-	}
+		if n.Data == "p" {
+			extractYearGenreRuntime(n, curFilm)
+		}
 
-	if n.Type == html.ElementNode && n.Data == "rt-img" {
-		extractPosterUrl(n, curFilm)
-	}
+		if n.Data == "rt-img" {
+			extractPosterUrl(n, curFilm)
+		}
 
-	if n.Type == html.ElementNode && n.Data == "score-board-deprecated" {
-		extractScoreRatingMedia(n, curFilm)
+		if n.Data == "score-board-deprecated" {
+			extractScoreRatingMedia(n, curFilm)
+		}
 	}
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
