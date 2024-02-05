@@ -28,7 +28,7 @@ type Film struct {
 	Genre         string   `json:"genre"`
 	Runtime       string   `json:"runtime"`
 	AudienceScore int      `json:"audience_score"`
-	TomatoScore   string   `json:"tomato_score"`
+	TomatoScore   int      `json:"tomato_score"`
 	Ratings       int      `json:"ratings"`
 	SimilarFilms  []string `json:"similar_films"`
 }
@@ -146,7 +146,8 @@ func extractScoreRatingMedia(n *html.Node, curFilm *Film) {
 		}
 
 		if attr.Key == "tomatometerscore" {
-			curFilm.TomatoScore = attr.Val
+			val, _ := strconv.Atoi(attr.Val)
+			curFilm.TomatoScore = val
 		}
 	}
 }

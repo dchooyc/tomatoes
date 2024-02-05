@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"strconv"
@@ -16,6 +17,7 @@ const (
 	tomatoesURL = "https://www.rottentomatoes.com/m/"
 	shawshank   = "shawshank_redemption"
 	out         = "output.json"
+	in          = "input.json"
 )
 
 type processedFilm struct {
@@ -25,6 +27,7 @@ type processedFilm struct {
 
 func main() {
 	root := flag.String("title", shawshank, "The title to begin crawling from")
+	input := flag.String("input", in, "Input location")
 	output := flag.String("output", out, "Output location")
 	maxDepth := flag.Int("depth", 2, "The depth at which to stop crawling")
 	numWorkers := flag.Int("workers", 20, "The number of workers to process films")
@@ -35,7 +38,12 @@ func main() {
 		panic(err)
 	}
 
-	queue := []string{*root}
+	retrieved, err := retrieveFile(*input)
+	if err != nil {
+		fmt.Println("retrieve file failed: ", *input, err)
+	}
+
+	queue := createQueue(retrieved, *root)
 	titleToFilm := make(map[string]*film.Film)
 	findFilms(queue, titleToFilm, *maxDepth, *numWorkers)
 
@@ -50,6 +58,48 @@ func main() {
 	if err != nil {
 		fmt.Println("writing to file failed: ", err)
 	}
+}
+
+func createQueue(retrieved *film.Films, root string) []string {
+	if retrieved == nil {
+		return []string{root}
+	}
+
+	queue, seen := []string{}, make(map[string]bool)
+
+	for i := 0; i < len(retrieved.Films); i++ {
+		film := retrieved.Films[i]
+		title := film.Title
+		queue = append(queue, title)
+		seen[title] = true
+	}
+
+	if !seen[root] {
+		queue = append(queue, root)
+	}
+
+	return queue
+}
+
+func retrieveFile(target string) (*film.Films, error) {
+	file, err := os.Open(target)
+	if err != nil {
+		return nil, fmt.Errorf("open file failed: %w", err)
+	}
+	defer file.Close()
+
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("read file failed: %w", err)
+	}
+
+	var films film.Films
+	err = json.Unmarshal(bytes, &films)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal json failed: %w", err)
+	}
+
+	return &films, nil
 }
 
 func arrangeFilms(titleToFilm map[string]*film.Film) film.Films {
