@@ -52,6 +52,10 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 		extractPosterUrl(n, curFilm)
 	}
 
+	if n.Type == html.ElementNode && n.Data == "score-board-deprecated" {
+		extractRating(n, curFilm)
+	}
+
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		extractFilmInfo(c, curFilm)
 	}
@@ -84,5 +88,13 @@ func extractPosterUrl(n *html.Node, curFilm *Film) {
 
 	if correctImg {
 		curFilm.PosterUrl = src
+	}
+}
+
+func extractRating(n *html.Node, curFilm *Film) {
+	for _, attr := range n.Attr {
+		if attr.Key == "rating" {
+			curFilm.Rating = attr.Val
+		}
 	}
 }
