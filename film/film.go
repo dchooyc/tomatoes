@@ -13,15 +13,17 @@ const (
 )
 
 type Film struct {
-	Title     string `json:"title"`
-	URL       string `json:"url"`
-	PosterUrl string `json:"poster_url"`
-	Rating    string `json:"rating"`
-	Year      string `json:"year"`
-	Genre     string `json:"genre"`
-	Runtime   string `json:"runtime"`
-	Score     string `json:"score"`
-	Ratings   string `json:"ratings"`
+	Title         string `json:"title"`
+	URL           string `json:"url"`
+	PosterUrl     string `json:"poster_url"`
+	MediaType     string `json:"media_type"`
+	Rating        string `json:"rating"`
+	Year          string `json:"year"`
+	Genre         string `json:"genre"`
+	Runtime       string `json:"runtime"`
+	AudienceScore string `json:"audience_score"`
+	TomatoScore   string `json:"tomato_score"`
+	Ratings       string `json:"ratings"`
 }
 
 func GetFilm(url string) (*Film, error) {
@@ -49,7 +51,7 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 	}
 
 	if n.Type == html.ElementNode && n.Data == "p" {
-		extractDetails(n, curFilm)
+		extractYearGenreRuntime(n, curFilm)
 	}
 
 	if n.Type == html.ElementNode && n.Data == "rt-img" {
@@ -57,7 +59,7 @@ func extractFilmInfo(n *html.Node, curFilm *Film) {
 	}
 
 	if n.Type == html.ElementNode && n.Data == "score-board-deprecated" {
-		extractRating(n, curFilm)
+		extractScoreRatingMedia(n, curFilm)
 	}
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
@@ -95,15 +97,27 @@ func extractPosterUrl(n *html.Node, curFilm *Film) {
 	}
 }
 
-func extractRating(n *html.Node, curFilm *Film) {
+func extractScoreRatingMedia(n *html.Node, curFilm *Film) {
 	for _, attr := range n.Attr {
 		if attr.Key == "rating" {
 			curFilm.Rating = attr.Val
 		}
+
+		if attr.Key == "audiencescore" {
+			curFilm.AudienceScore = attr.Val
+		}
+
+		if attr.Key == "mediatype" {
+			curFilm.MediaType = attr.Val
+		}
+
+		if attr.Key == "tomatometerscore" {
+			curFilm.TomatoScore = attr.Val
+		}
 	}
 }
 
-func extractDetails(n *html.Node, curFilm *Film) {
+func extractYearGenreRuntime(n *html.Node, curFilm *Film) {
 	for _, attr := range n.Attr {
 		if attr.Key == "data-qa" && attr.Val == "score-panel-subtitle" {
 			textNode := n.FirstChild
