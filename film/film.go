@@ -3,6 +3,7 @@ package film
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -12,6 +13,10 @@ const (
 	FilmPosterIndicator = "Watch trailer for "
 	MovieIndicator      = "/m/"
 )
+
+type Films struct {
+	Films []Film `json:"films"`
+}
 
 type Film struct {
 	Title         string   `json:"title"`
@@ -24,7 +29,7 @@ type Film struct {
 	Runtime       string   `json:"runtime"`
 	AudienceScore string   `json:"audience_score"`
 	TomatoScore   string   `json:"tomato_score"`
-	Ratings       string   `json:"ratings"`
+	Ratings       int      `json:"ratings"`
 	SimilarFilms  []string `json:"similar_films"`
 }
 
@@ -149,9 +154,19 @@ func extractYearGenreRuntime(n *html.Node, curFilm *Film) {
 			textNode := n.FirstChild
 			if textNode != nil && textNode.Type == html.TextNode {
 				parts := strings.Split(textNode.Data, ", ")
-				curFilm.Year = parts[0]
-				curFilm.Genre = parts[1]
-				curFilm.Runtime = parts[2]
+				for i := 0; i < len(parts); i++ {
+					if i == 0 {
+						curFilm.Year = parts[i]
+					}
+
+					if i == 1 {
+						curFilm.Genre = parts[i]
+					}
+
+					if i == 2 {
+						curFilm.Runtime = parts[i]
+					}
+				}
 				break
 			}
 		}
@@ -164,7 +179,10 @@ func extractRatings(n *html.Node, curFilm *Film) {
 			textNode := n.FirstChild
 			if textNode != nil && textNode.Type == html.TextNode {
 				parts := strings.Fields(textNode.Data)
-				curFilm.Ratings = parts[0]
+				strVal := strings.Split(parts[0], "+")[0]
+				val := strings.Join(strings.Split(strVal, ","), "")
+				ratings, _ := strconv.Atoi(val)
+				curFilm.Ratings = ratings
 				break
 			}
 		}
