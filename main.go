@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"sort"
 	"strconv"
@@ -39,7 +38,7 @@ func main() {
 		panic(err)
 	}
 
-	retrieved, err := retrieveFile(*input)
+	retrieved, err := film.RetrieveFilms(*input)
 	if err != nil {
 		fmt.Println("retrieve file failed: ", *input, err)
 	}
@@ -82,27 +81,6 @@ func createQueue(retrieved *film.Films, root string) []string {
 	return queue
 }
 
-func retrieveFile(target string) (*film.Films, error) {
-	file, err := os.Open(target)
-	if err != nil {
-		return nil, fmt.Errorf("open file failed: %w", err)
-	}
-	defer file.Close()
-
-	bytes, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("read file failed: %w", err)
-	}
-
-	var films film.Films
-	err = json.Unmarshal(bytes, &films)
-	if err != nil {
-		return nil, fmt.Errorf("unmarshal json failed: %w", err)
-	}
-
-	return &films, nil
-}
-
 func arrangeFilms(titleToFilm map[string]*film.Film) film.Films {
 	arranged := []film.Film{}
 
@@ -121,7 +99,7 @@ func arrangeFilms(titleToFilm map[string]*film.Film) film.Films {
 
 func meetsCriteria(curFilm *film.Film) bool {
 	ratings := curFilm.Ratings >= 1000
-	score := curFilm.AudienceScore >= 70
+	score := curFilm.AudienceScore >= 55 || curFilm.TomatoScore >= 55
 	return ratings && score
 }
 
